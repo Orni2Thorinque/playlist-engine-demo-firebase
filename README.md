@@ -8,7 +8,10 @@ Install a simple http server, like http-server based on NodeJs
 Go to dist directory and run **http-server -p 4000**
 Go to localhost:4000 to start the app
 
-# Install & serve
+# Install & Serve
 You need NodeJS (8 or greater) to install & serve the app
 Install it with **npm install**
 Serve the app with **npm start**
+
+# Demo
+https://playlist-engine-demo.firebaseapp.com/
