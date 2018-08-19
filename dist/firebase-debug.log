@@ -1,0 +1,18 @@
+[debug] [2018-08-13T08:25:20.746Z] ----------------------------------------------------------------------
+[debug] [2018-08-13T08:25:20.749Z] Command:       D:\tools\node-10.1.0\node.exe C:\Users\lisi\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase deploy
+[debug] [2018-08-13T08:25:20.749Z] CLI Version:   4.0.3
+[debug] [2018-08-13T08:25:20.749Z] Platform:      win32
+[debug] [2018-08-13T08:25:20.749Z] Node Version:  v10.1.0
+[debug] [2018-08-13T08:25:20.751Z] Time:          Mon Aug 13 2018 10:25:20 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:25:20.751Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-08-13T08:25:20.764Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-08-13T08:25:20.764Z] > authorizing via signed-in user
+[debug] [2018-08-13T08:25:20.766Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/playlist-engine-demo  
+  
+ Mon Aug 13 2018 10:25:20 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:25:21.342Z] <<< HTTP RESPONSE 200
+[debug] [2018-08-13T08:25:21.344Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/playlist-engine-demo/tokens  
+  
+ Mon Aug 13 2018 10:25:21 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:25:21.966Z] <<< HTTP RESPONSE 200

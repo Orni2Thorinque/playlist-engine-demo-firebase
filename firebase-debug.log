@@ -1,0 +1,27 @@
+[debug] [2018-08-13T08:24:11.874Z] ----------------------------------------------------------------------
+[debug] [2018-08-13T08:24:11.876Z] Command:       D:\tools\node-10.1.0\node.exe C:\Users\lisi\AppData\Roaming\npm\node_modules\firebase-tools\bin\firebase deploy
+[debug] [2018-08-13T08:24:11.876Z] CLI Version:   4.0.3
+[debug] [2018-08-13T08:24:11.876Z] Platform:      win32
+[debug] [2018-08-13T08:24:11.876Z] Node Version:  v10.1.0
+[debug] [2018-08-13T08:24:11.877Z] Time:          Mon Aug 13 2018 10:24:11 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:24:11.877Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2018-08-13T08:24:11.890Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2018-08-13T08:24:11.890Z] > authorizing via signed-in user
+[debug] [2018-08-13T08:24:11.892Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2018-08-13T08:24:11.892Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ { refresh_token: '1/-JGVhSkP1yj5k4ls-9Y1Yzfk7cY6KTOJsLbbrXUOqro',
+  client_id: '563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com',
+  client_secret: 'j9iVZfS8kkCEFUPaAeJV0sAi',
+  grant_type: 'refresh_token',
+  scope: 'email https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/cloudplatformprojects.readonly https://www.googleapis.com/auth/firebase openid' } 
+ Mon Aug 13 2018 10:24:11 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:24:11.991Z] <<< HTTP RESPONSE 200
+[debug] [2018-08-13T08:24:12.001Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/projects/playlist-engine-demo  
+  
+ Mon Aug 13 2018 10:24:12 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:24:12.656Z] <<< HTTP RESPONSE 200
+[debug] [2018-08-13T08:24:12.657Z] >>> HTTP REQUEST GET https://admin.firebase.com/v1/database/playlist-engine-demo/tokens  
+  
+ Mon Aug 13 2018 10:24:12 GMT+0200 (Paris, Madrid (heure d’été))
+[debug] [2018-08-13T08:24:13.338Z] <<< HTTP RESPONSE 200

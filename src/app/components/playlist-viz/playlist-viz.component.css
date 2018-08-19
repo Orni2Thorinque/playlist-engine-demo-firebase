@@ -1,0 +1,59 @@
+:host {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    background-color: #eab700;
+}
+
+.chip {
+    margin-top: 5px;
+}
+
+.chip-container {
+    position: relative;
+    padding: 10px;
+    background-color: rgb(46, 45, 45);
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+}
+
+.chip-control {
+    width: 100%;
+}
+
+.chip-saturation {
+    width: 100%;
+}
+
+.chip-button-add {
+    height: 150px;
+    width: 30px;
+    background-color: #fdc600;
+}
+
+.assign-content {
+    background-color: rgb(63, 63, 63) !important;
+    position: absolute;
+    bottom: -15px; right: -15px;
+}
+
+.pie-chart-container {
+    background-color: rgb(46, 45, 45);
+}
+
+::ng-deep text {
+    color: white;
+    fill: white;
+}
+
+::ng-deep .mat-form-field-ripple {
+    background-color: #fdc600 !important;    /* replace this color with your accent color hex code */
+}
+
+::ng-deep  .mat-input-element { 
+    caret-color: #ffd740 !important;
+}
