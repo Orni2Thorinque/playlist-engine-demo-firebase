@@ -35,6 +35,8 @@ export class PlaylistVizComponent implements AfterViewInit {
   public data: { name: string, value: number }[];
   public colors: { domain: string[] };
 
+  public loading: boolean = false;
+
   @ViewChild('contentInput') contentInput: ElementRef;
   @ViewChild('chips') chips: ElementRef;
   @ViewChild('control') control: ElementRef;
@@ -58,6 +60,7 @@ export class PlaylistVizComponent implements AfterViewInit {
   }
 
   public onAddContent(): void {
+    this.loading = true;
     if (this.contents.findIndex((content: Content) => content.name === this.nameCtrl.value) === -1) {
       this.contents.push({
         color: getRandomColor(),
@@ -80,7 +83,7 @@ export class PlaylistVizComponent implements AfterViewInit {
       this.colors = { domain: [...data.colors] };
       this.data = [...data.data];
     }
-
+    this.loading = false;
     this.updatePieHeight();
   }
 

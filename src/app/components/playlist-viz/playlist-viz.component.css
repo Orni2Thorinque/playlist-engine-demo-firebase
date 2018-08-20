@@ -37,7 +37,7 @@
 .chip-button-add {
     height: 150px;
     width: 30px;
-    background-color: #1f1a0c;
+    background-color: #fdc600;
 }
 
 .assign-content {
@@ -61,4 +61,9 @@
 
 ::ng-deep  .mat-input-element { 
     caret-color: #ffd740 !important;
+}
+
+::ng-deep .mat-progress-bar.mat-accent .mat-progress-bar-fill::after {
+    background-color: rgb(46, 45, 45) !important; 
+
 }
