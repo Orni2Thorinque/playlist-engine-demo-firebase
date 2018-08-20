@@ -2,19 +2,30 @@ import { Injectable } from '@angular/core';
 import { Content } from '../../shared/models/content.model';
 import { PieData } from './playlist-viz.component';
 
+import { LocalStorageService } from 'ngx-localstorage';
+
 export const MAX_VALUE = 10000;
+const STORAGE_CONTENTS_KEY = 'data';
 
 @Injectable()
 export class PlaylistVizService {
-    constructor() { }
+    constructor(private localStorage: LocalStorageService) { }
 
+    /** Compute playlist wrapper
+     * @param contents given contents to compute playlist
+     * @returns pie charts data to display
+     */
     public compute(contents: Content[]): PieData {
         const playlist: Content[] = this.bubbleCalculator(contents);
         const pieData: any = this.computePieData(playlist);
-        const rating: number = this.ratePlaylist(contents, playlist);
+        this.store(contents);
         return (pieData || []);
     }
 
+    /**
+     * Extract data for Pie Chart from playlist assignment
+     * @param playlist given content playlist
+     */
     private computePieData(playlist: Content[]): PieData {
         const colors: string[] = [];
         const data: { name: string, value: number }[] = [];
@@ -40,7 +51,14 @@ export class PlaylistVizService {
         return { colors: colors, data: data };
     }
 
-    private computestandardDeviationForContent(target: Content, _playlist: Content[], best: number) {
+    /**
+     * Compute standard deviation for a content
+     * @param target given content to compute SD
+     * @param _playlist given content asignment to compute SD
+     * @param best given average distance as reference for SD
+     * @returns computed SD for content
+     */
+    private computestandardDeviationForContent(target: Content, _playlist: Content[], best: number): number {
         let standardDeviation = 0;
         let cpt = 0;
         const nbAffectation = target.saturation;
@@ -81,6 +99,7 @@ export class PlaylistVizService {
      * Compute (best) average distance between two affectations of the same content
      * @param target @type Content: given content
      * @param contents @type Content[]: given content list
+     * @returns computed best theoric distance for content
      */
     private computeAverageDistanceForContent(target: Content, contents: Content[]): number {
         let dc = 0;
@@ -88,6 +107,11 @@ export class PlaylistVizService {
         return dc / target.saturation;
     }
 
+    /**
+     * Compute playlist from contents by Insert-Evaluate-Decide algorithm
+     * @param _contents @type Content[]: given content list
+     * @returns computed playlist
+     */
     private bubbleCalculator(_contents: Content[]): Content[] {
         const playlist: Content[] = [];
 
@@ -132,6 +156,29 @@ export class PlaylistVizService {
         return playlist;
     }
 
+    /**
+     * Compute playlist rating from standard deviation
+     * @param contents @type Content[]: given content list
+     * @param playlist @type Content[]: given playlist
+     * @returns computed playlist rating based on standard deviation
+     */
+    private ratePlaylist(contents: Content[], playlist: Content[]): number {
+        let rating = 0;
+
+        contents.forEach((content: Content) => {
+            const best = this.computeAverageDistanceForContent(content, contents);
+            const standardDeviation = this.computestandardDeviationForContent(content, playlist, best);
+            rating += standardDeviation;
+        });
+
+        return rating;
+    }
+
+    /**
+     * Compute playlist from contents by insert strategy algorithm
+     * @param _contents @type Content[]: given content list
+     * @returns computed playlist
+     */
     private simpleCalculator(contents: Content[]): Content[] {
         const ordererContents: Content[] = contents.sort((c1: Content, c2: Content) => {
             return c1.saturation < c2.saturation ? 1 : -1;
@@ -222,19 +269,29 @@ export class PlaylistVizService {
         return finalList;
     }
 
-    private ratePlaylist(contents: Content[], playlist: Content[]): number {
-        let rating = 0;
+    /**
+     * Get contents to restore from Local storage
+    */
+    public restore(): Content[] {
+        let data: Content[];
+        try {
+            const storedData = this.localStorage.get(STORAGE_CONTENTS_KEY);
+            data = JSON.parse(storedData);
+        } finally {
+            return data ? data : [];
+        }
+    }
 
-        contents.forEach((content: Content) => {
-            const best = this.computeAverageDistanceForContent(content, contents);
-            const standardDeviation = this.computestandardDeviationForContent(content, playlist, best);
-            rating += standardDeviation;
-        });
-
-        return rating;
+    /**
+    * Save content into Local storage
+    */
+    public store(contents: Content[]): void {
+        const stringifiedData = JSON.stringify(contents);
+        this.localStorage.set(STORAGE_CONTENTS_KEY, stringifiedData);
     }
 }
 
+/** UTILS */
 export function getLastIndex(content: Content, contents: Content[]): number {
     return contents.lastIndexOf(content);
 }

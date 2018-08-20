@@ -19,13 +19,21 @@
       <mat-icon svgIcon="add"></mat-icon>
     </button>
 
-    <div fxLayout="column" fxLayoutAlign="center start" [style.width.px]="windowDim[0] - 50">
-      <mat-slider class="chip-saturation" [max]="20" [min]="0" [step]="1" [thumbLabel]="true" [(ngModel)]="saturation" color="accent">
-      </mat-slider>
-      <mat-slider class="chip-saturation" [max]="20" [min]="1" [step]="1" [thumbLabel]="true" [(ngModel)]="duration" color="accent">
-      </mat-slider>
+    <div class="label" fxLayout="column" fxLayoutAlign="center start" [style.width.px]="windowDim[0] - 50">
+      <div style="width: 100%" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+        <span>Saturation:</span>
+        <mat-slider class="chip-saturation" [max]="20" [min]="0" [step]="1" [thumbLabel]="true" [(ngModel)]="saturation" color="accent">
+        </mat-slider>
+      </div>
+      <div style="width: 100%" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+        <span>Duration: &nbsp;&nbsp;</span>
+        <mat-slider class="chip-saturation" [max]="20" [min]="1" [step]="1" [thumbLabel]="true" [(ngModel)]="duration" color="accent">
+        </mat-slider>
+      </div>
+
+
       <mat-form-field class="chip-control">
-        <mat-label style="color: #fcc500">Add content...</mat-label>
+        <mat-label style="color: #fcc500">+ Add Content</mat-label>
         <input matInput color="accent" style="color:#ffd740 " [formControl]="nameCtrl">
       </mat-form-field>
     </div>
@@ -38,8 +46,7 @@
   <!-- Content pie-->
   <div class="pie-chart-container" [style.width.px]="windowDim[0] - 40" [style.height.px]="pieHeight" #pie>
     <ngx-charts-pie-chart *ngIf="colors && data" [view]="[windowDim[0] - 80, pieHeight - 10]" [results]="data" [scheme]="colors"
-      [animations]="true" [labels]="true" [doughnut]="isDoughnut" [gradient]="true" [tooltipDisabled]="false"
-      fxLayout="row">
+      [animations]="true" [labels]="true" [doughnut]="isDoughnut" [gradient]="true" [tooltipDisabled]="false" fxLayout="row">
     </ngx-charts-pie-chart>
   </div>
 </div>

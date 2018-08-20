@@ -25,22 +25,7 @@ export class PlaylistVizComponent implements AfterViewInit {
   public pieHeight = 0;
 
   public nameCtrl = new FormControl(null, Validators.required);
-  public contents: Content[] = [{
-    color: getRandomColor(),
-    name: 'C1',
-    saturation: 3,
-    duration: 4
-  }, {
-    color: getRandomColor(),
-    name: 'C2',
-    saturation: 2,
-    duration: 1
-  }, {
-    color: getRandomColor(),
-    name: 'C3',
-    saturation: 1,
-    duration: 1
-  }];
+  public contents: Content[] = [];
 
   public isDoughnut = false;
   public editedContent: Content;
@@ -64,6 +49,8 @@ export class PlaylistVizComponent implements AfterViewInit {
     iconRegistry.addSvgIcon('add', sanitizer.bypassSecurityTrustResourceUrl('assets/add.svg'))
       .addSvgIcon('cancel', sanitizer.bypassSecurityTrustResourceUrl('assets/cancel.svg'))
       .addSvgIcon('chart', sanitizer.bypassSecurityTrustResourceUrl('assets/chart.svg'));
+
+    this.contents = this.playlistService.restore();
   }
 
   ngAfterViewInit() {
@@ -99,7 +86,14 @@ export class PlaylistVizComponent implements AfterViewInit {
 
   public onChangeMode() {
     this.isDoughnut = !this.isDoughnut;
-    this.playlistService.compute(this.contents);
+    if (!this.data) {
+      const data: PieData = this.playlistService.compute(this.contents);
+      if (data) {
+        this.colors = { domain: [...data.colors] };
+        this.data = [...data.data];
+        this.updatePieHeight();
+      }
+    }
   }
 
   public onRemoveContent(_content: Content): void {

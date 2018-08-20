@@ -29,10 +29,15 @@
     width: 100%;
 }
 
+.label {
+    color: #fdc600;
+    font-weight: normal;
+}
+
 .chip-button-add {
     height: 150px;
     width: 30px;
-    background-color: #fdc600;
+    background-color: #1f1a0c;
 }
 
 .assign-content {
