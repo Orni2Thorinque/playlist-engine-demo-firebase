@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Content } from '../../shared/models/content.model';
-import { PieData } from './playlist-viz.component';
+import { PieData, ForceMapData, Link } from './playlist-viz.component';
 
 import { LocalStorageService } from 'ngx-localstorage';
 
@@ -18,7 +18,6 @@ export class PlaylistVizService {
     public compute(contents: Content[]): PieData {
         const playlist: Content[] = this.bubbleCalculator(contents);
         const pieData: any = this.computePieData(playlist);
-        this.store(contents);
         return (pieData || []);
     }
 
@@ -49,6 +48,31 @@ export class PlaylistVizService {
         });
 
         return { colors: colors, data: data };
+    }
+
+    /**
+     * Extract data for saturation force map from content configuration
+     * @param contents given content list
+     */
+    public computeForceMap(contents: Content[]): ForceMapData {
+        const colors: string[] = [];
+        const data: { value: string }[] = [];
+        const links: Link[] = [];
+
+        contents.forEach((c: Content) => {
+            data.push({ value: c.name });
+            colors.push(c.color);
+        });
+
+        contents.forEach((c: Content) => {
+            c.separation.forEach((s: string) => {
+                if (!links.some((l: Link) => (c.name === l.source && s === l.target) || (c.name === l.target && s === l.source))) {
+                    links.push({ source: c.name, target: s });
+                }
+            });
+        });
+
+        return { colors: colors, data: data, links: links };
     }
 
     /**

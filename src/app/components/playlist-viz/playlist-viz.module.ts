@@ -19,6 +19,7 @@ import {
     MatRippleModule,
     MatSliderModule,
     MatSlideToggleModule,
+    MatTabsModule,
     MatToolbarModule,
     MatTooltipModule,
 } from '@angular/material';
@@ -60,6 +61,7 @@ import { CommonModule } from '../../../../node_modules/@angular/common';
         MatRippleModule,
         MatSliderModule,
         MatSlideToggleModule,
+        MatTabsModule,
         MatToolbarModule,
         MatTooltipModule
     ],

@@ -3,4 +3,5 @@ export interface Content {
     saturation: number;
     color: string;
     duration: number;
+    separation: string[];
 }

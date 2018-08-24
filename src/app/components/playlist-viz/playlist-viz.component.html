@@ -1,53 +1,80 @@
 <mat-progress-bar *ngIf="loading" color="accent" mode="indeterminate"></mat-progress-bar>
-<div class="container" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5px" [style.width.px]="windowDim[0]"
-  [style.height.px]="windowDim[1]">
+<mat-tab-group mat-stretch-tabs dynamicHeight color="accent" headerPosition="below">
+  <!-- Content Tab-->
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <mat-icon svgIcon="contents" style="fill: #ffd740"></mat-icon>
+    </ng-template>
+    <div class="container" fxLayout="column" fxLayoutAlign="center center" fxLayoutGap="5px" [style.width.px]="windowDim[0]"
+      [style.height.px]="windowDim[1]">
 
-  <!-- Content chips-->
-  <div fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="15px" [style.width.px]="windowDim[0] - 20" #chips>
-    <button *ngFor="let content of contents" mat-raised-button class="chip" matBadge="{{content.saturation}}" matBadgeColor="accent"
-      matBadgePosition="before" matBadgeSize="medium" [style.background-color]="content.color">
-      <div fxLayout="row" fxLayoutAlign="center center">
-        <div style="font-weight: bolder">{{content.name}} : {{content.duration}}</div> &nbsp; &nbsp;
-        <mat-icon svgIcon="cancel" style=" fill: #fdc600" (click)="onRemoveContent(content)"></mat-icon>
-      </div>
-    </button>
-  </div>
-
-  <!-- Content Control -->
-  <div class="chip-container" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px" [style.width.px]="windowDim[0] - 40"
-    #control>
-    <button mat-raised-button class="chip-button-add" [disabled]="nameCtrl.invalid || !saturation" (click)="onAddContent()">
-      <mat-icon svgIcon="add"></mat-icon>
-    </button>
-
-    <div class="label" fxLayout="column" fxLayoutAlign="center start" [style.width.px]="windowDim[0] - 50">
-      <div style="width: 100%" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
-        <span>Saturation:</span>
-        <mat-slider class="chip-saturation" [max]="20" [min]="0" [step]="1" [thumbLabel]="true" [(ngModel)]="saturation" color="accent">
-        </mat-slider>
-      </div>
-      <div style="width: 100%" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
-        <span>Duration: &nbsp;&nbsp;</span>
-        <mat-slider class="chip-saturation" [max]="20" [min]="1" [step]="1" [thumbLabel]="true" [(ngModel)]="duration" color="accent">
-        </mat-slider>
+      <!-- Content chips-->
+      <div fxLayout="row wrap" fxLayoutAlign="center center" fxLayoutGap="15px" [style.width.px]="windowDim[0] - 20" #chips>
+        <button *ngFor="let content of contents" mat-raised-button class="chip" matBadge="{{content.saturation}}" matBadgeColor="accent"
+          matBadgePosition="before" matBadgeSize="medium" [style.background-color]="content.color">
+          <div fxLayout="row" fxLayoutAlign="center center">
+            <div style="font-weight: bolder">{{content.name}} : {{content.duration}}</div> &nbsp; &nbsp;
+            <mat-icon svgIcon="cancel" style=" fill: #fdc600" (click)="onRemoveContent(content)"></mat-icon>
+          </div>
+        </button>
       </div>
 
+      <!-- Content Control -->
+      <div class="chip-container" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="10px" [style.width.px]="windowDim[0] - 40"
+        #control>
+        <button mat-raised-button class="chip-button-add" [disabled]="nameCtrl.invalid || !saturation" (click)="onAddContent()">
+          <mat-icon svgIcon="add"></mat-icon>
+        </button>
 
-      <mat-form-field class="chip-control">
-        <mat-label style="color: #fcc500">+ Add Content</mat-label>
-        <input matInput color="accent" style="color:#ffd740 " [formControl]="nameCtrl">
-      </mat-form-field>
+        <div class="label" fxLayout="column" fxLayoutAlign="center start" [style.width.px]="windowDim[0] - 50">
+          <div style="width: 100%" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+            <span>Saturation:</span>
+            <mat-slider class="chip-saturation" [max]="20" [min]="1" [step]="1" [thumbLabel]="true" [(ngModel)]="saturation" color="accent">
+            </mat-slider>
+          </div>
+          <div style="width: 100%" fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="5px">
+            <span>Duration: &nbsp;&nbsp;</span>
+            <mat-slider class="chip-saturation" [max]="20" [min]="1" [step]="1" [thumbLabel]="true" [(ngModel)]="duration" color="accent">
+            </mat-slider>
+          </div>
+
+
+          <mat-form-field class="chip-control">
+            <mat-label style="color: #fcc500">+ Add Content</mat-label>
+            <input matInput color="accent" style="color:#ffd740 " [formControl]="nameCtrl">
+          </mat-form-field>
+        </div>
+
+        <button mat-mini-fab class="assign-content" *ngIf="contents && contents.length" (click)="onChangeMode()">
+          <mat-icon *ngIf="!isDoughnut" svgIcon="chart" style="fill: #ffd740"></mat-icon>
+          <mat-icon *ngIf="isDoughnut" svgIcon="donut" style="fill: #ffd740"></mat-icon>
+        </button>
+      </div>
     </div>
+  </mat-tab>
 
-    <button mat-mini-fab class="assign-content" *ngIf="contents && contents.length" (click)="onChangeMode()">
+  <!-- Force Map Tab-->
+  <mat-tab fxLayout="column" fxLayoutAlign="center center">
+    <ng-template mat-tab-label>
+      <mat-icon svgIcon="lines" style="fill: #ffd740"></mat-icon>
+    </ng-template>
+    <div class="force-map-container" [style.width.px]="windowDim[0]" [style.height.px]="windowDim[1]">
+      <ngx-charts-force-directed-graph (click)="onTargetNode($event)" [animations]="true" [legend]="true" [legendTitle]="'Contents'" [nodes]="forceMapData" [links]="forceMapLinks"
+        [scheme]="forceMapColors" [view]="[windowDim[0] - 40, windowDim[1]]" [tooltipDisabled]="false" (select)="onSelectNode($event)" #forceMap>
+      </ngx-charts-force-directed-graph>
+    </div>
+  </mat-tab>
+
+  <!-- Pie Data Tab-->
+  <mat-tab>
+    <ng-template mat-tab-label>
       <mat-icon svgIcon="chart" style="fill: #ffd740"></mat-icon>
-    </button>
-  </div>
-
-  <!-- Content pie-->
-  <div class="pie-chart-container" [style.width.px]="windowDim[0] - 40" [style.height.px]="pieHeight" #pie>
-    <ngx-charts-pie-chart *ngIf="colors && data" [view]="[windowDim[0] - 80, pieHeight - 10]" [results]="data" [scheme]="colors"
-      [animations]="true" [labels]="true" [doughnut]="isDoughnut" [gradient]="true" [tooltipDisabled]="false" fxLayout="row">
-    </ngx-charts-pie-chart>
-  </div>
-</div>
+    </ng-template>
+    <div class="pie-chart-container" [style.width.px]="windowDim[0]" [style.height.px]="windowDim[1]" fxLayout="column" fxLayoutAlign="center stretch"
+      #pie>
+      <ngx-charts-pie-chart *ngIf="pieColors && pieData" [view]="[windowDim[0], pieHeight]" [results]="pieData" [scheme]="pieColors"
+        [animations]="true" [labels]="true" [doughnut]="isDoughnut" [gradient]="true" [tooltipDisabled]="false" fxLayout="row">
+      </ngx-charts-pie-chart>
+    </div>
+  </mat-tab>
+</mat-tab-group>

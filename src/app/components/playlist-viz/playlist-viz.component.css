@@ -50,6 +50,10 @@
     background-color: rgb(46, 45, 45);
 }
 
+.force-map-container {
+    /* background-color: rgb(46, 45, 45); */
+}
+
 ::ng-deep text {
     color: white;
     fill: white;
@@ -66,4 +70,22 @@
 ::ng-deep .mat-progress-bar.mat-accent .mat-progress-bar-fill::after {
     background-color: rgb(46, 45, 45) !important; 
 
+}
+
+::ng-deep .mat-tab-labels {
+    background-color: rgb(46, 45, 45);
+}
+
+::ng-deep .mat-tab-header {
+    height: 50px;
+    background-color: rgb(46, 45, 45);
+}
+
+::ng-deep .chart-legend .legend-label  {
+    color: rgb(46, 45, 45) !important;
+    font-weight: bolder !important;
+}
+
+::ng-deep circle:hover {
+    cursor: pointer;
 }
