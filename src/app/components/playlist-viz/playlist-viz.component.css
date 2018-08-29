@@ -16,6 +16,7 @@
 
 .chip-container {
     position: relative;
+    overflow: hidden;
     padding: 10px;
     background-color: rgb(46, 45, 45);
     box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
@@ -43,15 +44,25 @@
 .assign-content {
     background-color: rgb(63, 63, 63) !important;
     position: absolute;
-    bottom: -15px; right: -15px;
+    bottom: 15px;
+    left: 15px;
+}
+
+.compute-content {
+    background-color: rgb(63, 63, 63) !important;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
 }
 
 .pie-chart-container {
     background-color: rgb(46, 45, 45);
 }
 
-.force-map-container {
-    /* background-color: rgb(46, 45, 45); */
+.separation-control {
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+    background-color: rgb(46, 45, 45);
+    margin-top: 10px;
 }
 
 ::ng-deep text {
@@ -69,7 +80,6 @@
 
 ::ng-deep .mat-progress-bar.mat-accent .mat-progress-bar-fill::after {
     background-color: rgb(46, 45, 45) !important; 
-
 }
 
 ::ng-deep .mat-tab-labels {
@@ -82,10 +92,29 @@
 }
 
 ::ng-deep .chart-legend .legend-label  {
-    color: rgb(46, 45, 45) !important;
-    font-weight: bolder !important;
+    color: #fdc600 !important;
+    font-size: smaller !important;
 }
 
 ::ng-deep circle:hover {
     cursor: pointer;
+}
+
+::ng-deep .mat-slide-toggle-content {
+    color: #fdc600;
+    font-size: smaller;
+}
+
+::ng-deep .chart-legend .legend-labels {
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+    background-color: rgb(46, 45, 45) !important;
+    border-radius: 0 !important;
+    position: absolute !important;
+    top: 50px !important;
+    width: 100px !important;
+    left: 10px !important;
+}
+
+::ng-deep .mat-slider-horizontal {
+    min-width: 0px !important;
 }

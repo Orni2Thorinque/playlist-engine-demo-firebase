@@ -1,27 +1,15 @@
 import { Component, ViewChild, ViewChildren, QueryList, ElementRef, AfterViewInit, HostListener, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-import { MatIconRegistry } from '@angular/material';
-import { Content } from '../../shared/models/content.model';
-import { getRandomColor } from '../../shared/utils/color.utils';
 import { DomSanitizer } from '@angular/platform-browser';
+
+import { MatIconRegistry, MatSlideToggleChange } from '@angular/material';
+
 import { PlaylistVizService } from './playlist-viz.service';
 import { ForceDirectedGraphComponent } from '@swimlane/ngx-charts';
 
-export interface PieData {
-  colors: string[];
-  data: { name: string, value: number }[];
-}
-
-export interface ForceMapData {
-  colors: string[];
-  data: { value: string }[];
-  links: Link[];
-}
-
-export interface Link {
-  source: string;
-  target: string;
-}
+import { Link, ForceMapData, PieData } from './playlist-viz.models';
+import { Content } from '../../shared/models/content.model';
+import { getRandomColor } from '../../shared/utils/color.utils';
 
 @Component({
   selector: 'app-playlist-viz',
@@ -53,6 +41,9 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
   private nodeSelect: Content[] = [];
   private circleNode;
 
+  public isSeperate = false;
+  public isSelfSeperate = false;
+
   public loading = false;
 
   @ViewChild('contentInput') contentInput: ElementRef;
@@ -61,7 +52,8 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
   @ViewChild('pie') pie: ElementRef;
   @ViewChild('forceMap') forceMap: ForceDirectedGraphComponent;
 
-  @HostListener('window:resize', ['$event']) onResize(event: Event) {
+  @HostListener('window:resize', ['$event'])
+  private onResize(event: Event) {
     this.windowDim = [this.elRef.nativeElement.clientWidth, this.elRef.nativeElement.clientHeight - 50];
   }
 
@@ -71,16 +63,13 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
       .addSvgIcon('cancel', sanitizer.bypassSecurityTrustResourceUrl('assets/cancel.svg'))
       .addSvgIcon('donut', sanitizer.bypassSecurityTrustResourceUrl('assets/donut.svg'))
       .addSvgIcon('lines', sanitizer.bypassSecurityTrustResourceUrl('assets/lines.svg'))
+      .addSvgIcon('play', sanitizer.bypassSecurityTrustResourceUrl('assets/play.svg'))
       .addSvgIcon('settings', sanitizer.bypassSecurityTrustResourceUrl('assets/settings.svg'))
       .addSvgIcon('contents', sanitizer.bypassSecurityTrustResourceUrl('assets/contents.svg'))
       .addSvgIcon('chart', sanitizer.bypassSecurityTrustResourceUrl('assets/chart.svg'));
 
     this.contents = this.playlistService.restore();
     if (this.contents) {
-      const pie: PieData = this.playlistService.compute(this.contents);
-      this.pieColors = { domain: [...pie.colors] };
-      this.pieData = [...pie.data];
-
       const forceMapData: ForceMapData = this.playlistService.computeForceMap(this.contents);
       this.forceMapData = [...forceMapData.data];
       this.forceMapColors = { domain: [...forceMapData.colors] };
@@ -88,23 +77,37 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
     }
   }
 
-  ngOnInit() {
-    console.log('caca');
-  }
+  ngOnInit() { }
 
   ngAfterViewInit() {
     this.windowDim = [this.elRef.nativeElement.clientWidth, this.elRef.nativeElement.clientHeight - 50];
+    setTimeout(() => {
+      const seperation = this.playlistService.seperationRestore();
+      this.isSeperate = seperation.ext;
+      this.isSelfSeperate = seperation.auto;
+      this.playlistService.changeSeperationMode('auto', this.isSelfSeperate);
+      this.playlistService.changeSeperationMode('ext', this.isSeperate);
+    }, 200);
+  }
+
+  public onCompute() {
+    this.loading = true;
+    const pieData: PieData = this.playlistService.compute(this.contents);
+    if (pieData) {
+      this.pieColors = { domain: [...pieData.colors] };
+      this.pieData = [...pieData.data];
+    }
+    setTimeout(() => this.loading = false, 200);
   }
 
   public onAddContent(): void {
-    this.loading = true;
     if (this.contents.findIndex((content: Content) => content.name === this.nameCtrl.value) === -1) {
       this.contents.push({
         color: getRandomColor(),
         name: this.nameCtrl.value.toUpperCase(),
         saturation: this.saturation,
         duration: this.duration,
-        separation: []
+        separation: [this.nameCtrl.value.toUpperCase()]
       });
 
       this.saturation = 1;
@@ -118,11 +121,7 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
   public onAssignContent(): void {
     this.playlistService.store(this.contents);
 
-    const pieData: PieData = this.playlistService.compute(this.contents);
-    if (pieData) {
-      this.pieColors = { domain: [...pieData.colors] };
-      this.pieData = [...pieData.data];
-    }
+    this.loading = true;
 
     const forceMapData: ForceMapData = this.playlistService.computeForceMap(this.contents);
     this.forceMapData = [...forceMapData.data];
@@ -135,14 +134,14 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
 
   public onChangeMode() {
     this.isDoughnut = !this.isDoughnut;
-    if (!this.pieData) {
-      const data: PieData = this.playlistService.compute(this.contents);
-      if (data) {
-        this.pieColors = { domain: [...data.colors] };
-        this.pieData = [...data.data];
-        this.updatePieHeight();
-      }
-    }
+    // if (!this.pieData) {
+    //   const data: PieData = this.playlistService.compute(this.contents);
+    //   if (data) {
+    //     this.pieColors = { domain: [...data.colors] };
+    //     this.pieData = [...data.data];
+    //     this.updatePieHeight();
+    //   }
+    // }
   }
 
   public onRemoveContent(_content: Content): void {
@@ -163,6 +162,9 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Force map node click handler
+   * @param event Click event
+   */
   public onSelectNode(event: any): void {
     if (this.nodeSelect[0]) { // Second node select
       if (this.nodeSelect[0].name !== event.name) {
@@ -197,6 +199,10 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
     }
   }
 
+  /** Add/Remove link and update content model
+   * @param add Whether we are adding or removing a link
+   * @param separation given link
+   */
   private updateSeperation(add: boolean, separation: Link): void {
     const source = this.contents.find((c: Content) => c.name === separation.source);
     const target = this.contents.find((c: Content) => c.name === separation.target);
@@ -223,6 +229,9 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
     this.playlistService.store(this.contents);
   }
 
+  /** Forcemap graph click handler to focus/unfocus clicked link
+   * @param event given click event
+   */
   public onTargetNode(event) {
     if (event.target.attributes['r']) {
       if (this.circleNode) {
@@ -236,7 +245,17 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
       if (this.circleNode) {
         this.circleNode.attributes['r'].nodeValue = 5;
         this.circleNode = null;
+        this.nodeSelect = [null, null];
       }
     }
+  }
+
+  /** (Self) Seperation toggle event handler
+   * @param type given seperation type (auto = self seperation, ext = seperation)
+   * @param change given slide toggle event
+   */
+  public onChangeSeperation(type: 'auto' | 'ext', change: MatSlideToggleChange): void {
+    const seperate = change.checked;
+    this.playlistService.changeSeperationMode(type, seperate);
   }
 }

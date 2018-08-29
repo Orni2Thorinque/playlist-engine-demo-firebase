@@ -1,14 +1,27 @@
 import { Injectable } from '@angular/core';
+
 import { Content } from '../../shared/models/content.model';
-import { PieData, ForceMapData, Link } from './playlist-viz.component';
+import { PieData, ForceMapData, Link } from './playlist-viz.models';
 
 import { LocalStorageService } from 'ngx-localstorage';
 
 export const MAX_VALUE = 10000;
 const STORAGE_CONTENTS_KEY = 'data';
+const SEPERATION_CONTENTS_KEY = 'seperation';
+
+interface OptimDebugStep {
+    playlist: Content[];
+    remainder: Content[][];
+    iteration: number;
+}
 
 @Injectable()
 export class PlaylistVizService {
+    private optimDebug: OptimDebugStep[] = [];
+
+    public isSeperate = false;
+    public isSelfSeperate = false;
+
     constructor(private localStorage: LocalStorageService) { }
 
     /** Compute playlist wrapper
@@ -16,7 +29,7 @@ export class PlaylistVizService {
      * @returns pie charts data to display
      */
     public compute(contents: Content[]): PieData {
-        const playlist: Content[] = this.bubbleCalculator(contents);
+        const playlist: Content[] = this.optimSortCalculator(contents);
         const pieData: any = this.computePieData(playlist);
         return (pieData || []);
     }
@@ -133,51 +146,131 @@ export class PlaylistVizService {
 
     /**
      * Compute playlist from contents by Insert-Evaluate-Decide algorithm
-     * @param _contents @type Content[]: given content list
+     * @param contents Content[]: given content list
+     * @param threshold given number of retry before exit
      * @returns computed playlist
-     */
-    private bubbleCalculator(_contents: Content[]): Content[] {
-        const playlist: Content[] = [];
+    */
+    public optimSortCalculator(contents: Content[], threshold?: number): Content[] {
+        this.optimDebug = []; // Reset Debug
+        let tryThreshold: number = (threshold || 30);
 
-        const ordererContents: Content[] = _contents.sort((c1: Content, c2: Content) => {
-            return c1.saturation > c2.saturation ? 1 : -1;
+        // Create initial content pool of every content, saturation wise
+        let contentPool: Content[] = [];
+        contents.forEach((c: Content) => {
+            Array.from(Array(c.saturation).keys()).forEach((val: number) => contentPool.push(c));
         });
 
-        ordererContents.forEach((content: Content) => {
-            let maxRating = MAX_VALUE;
+        // Shuffle content pool
+        contentPool = shuffle(shuffle(shuffle(shuffle(shuffle(shuffle(contentPool))))));
+        // contentPool = contentPool;
 
-            Array.from(Array(content.saturation).keys()).forEach((s: number) => {
+        /*  seperationRemainder[0] self seperation
+            seperationRemainder[1] ext seperation
+            seperationRemainder[2] both
+        */
+        let seperationRemainder: Content[][] = [[], [], []];
+        const playlist: Content[] = [];
+        let maxRating = MAX_VALUE;
+
+        do {
+            // FOR-EACH: Content in content pool
+            contentPool.forEach((content: Content) => {
                 let playlistTemp = [];
                 let bestPivot: Content = null;
                 let bestPivotIndex: number = null;
+                let seperationStatus = 0;
 
+                // FOR-EACH: Pivot in affected playlist
                 playlist.forEach((pivot: Content, index: number) => {
                     playlistTemp = [...playlist];
-                    playlistTemp.splice(index, 0, content);
-                    const contentsTemp = contentsFromPlaylist(playlistTemp);
 
-                    const rating = this.ratePlaylist(contentsTemp, playlistTemp);
+                    seperationStatus = this.checkSeperation(content, index, playlist);
 
-                    if (rating < maxRating) {
-                        bestPivot = pivot;
-                        bestPivotIndex = index;
-                        maxRating = rating;
+                    // IF: No seperation constraint viloation
+                    if (seperationStatus === 0) {
+                        playlistTemp.splice(index, 0, content);
+
+                        const contentsTemp = contentsFromPlaylist(playlistTemp);
+                        const rating = this.ratePlaylist(contentsTemp, playlistTemp);
+
+                        if (rating < maxRating) {
+                            bestPivot = pivot;
+                            bestPivotIndex = index + 1;
+                            maxRating = rating;
+                        }
+                        // ELSE: Seperation constraint violation
+                    } else if (index === playlist.length - 1) {
+
                     }
                 });
 
                 if (bestPivot && bestPivotIndex !== null) {
                     playlist.splice(bestPivotIndex, 0, content);
                 } else {
-                    playlist.push(content);
+                    switch (seperationStatus) {
+                        case 0:
+                            playlist.push(content);
+                            break;
+
+                        case 1:
+                            seperationRemainder[0].push(content);
+                            break;
+                        case 2:
+                            seperationRemainder[1].push(content);
+                            break;
+
+                        case 3:
+                            seperationRemainder[2].push(content);
+                            break;
+                    }
                 }
 
                 maxRating = MAX_VALUE;
                 bestPivotIndex = null;
                 bestPivot = null;
+                seperationStatus = 0;
             });
-        });
+
+            // Refill content pool with remainder from previous iteration
+            tryThreshold--;
+            this.optimDebug[0] = { playlist: playlist, remainder: seperationRemainder, iteration: ((threshold || 100) - tryThreshold) };
+            contentPool = [...seperationRemainder[1], ...seperationRemainder[2], ...seperationRemainder[0]];
+            seperationRemainder = [[], [], []];
+        } while (tryThreshold && contentPool.length);
 
         return playlist;
+    }
+
+    /** Check seperation of content for insert in playlist
+     * @param content given content to check
+     * @param index given index to insert in playlist
+     * @param playlist given playlist in which we insert
+     * @returns '1' self-seperation | '2' seperation | '3' both | 0 no seperation issue
+     */
+    private checkSeperation(content: Content, index: number, playlist: Content[]): number {
+        let result = 0;
+
+        if (this.isSelfSeperate || this.isSeperate) {
+            const neighbors: string[] = [
+                playlist[index].name,
+                index + 1 >= playlist.length ? playlist[0].name : playlist[index + 1].name
+            ];
+
+            if (this.isSeperate) {
+                if ((neighbors[0] !== content.name) && (content.separation.indexOf(neighbors[0]) > -1) ||
+                    (neighbors[1] !== content.name) && (content.separation.indexOf(neighbors[1]) > -1)) {
+                    result += 2;
+                }
+            }
+
+            if (this.isSelfSeperate) {
+                if (content.name === neighbors[0] || content.name === neighbors[1]) {
+                    result += 1;
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -198,11 +291,65 @@ export class PlaylistVizService {
         return rating;
     }
 
+    private manageSeperation(playlist: Content[]): boolean {
+        return false;
+    }
+
+    /** Change seperation mode
+     */
+    public changeSeperationMode(type: 'auto' | 'ext', value: boolean): void {
+        if (type === 'auto') {
+            this.isSelfSeperate = value;
+        }
+
+        if (type === 'ext') {
+            this.isSeperate = value;
+        }
+
+        const stringifiedData = JSON.stringify({
+            auto: this.isSelfSeperate,
+            ext: this.isSeperate
+        });
+
+        this.localStorage.set(SEPERATION_CONTENTS_KEY, stringifiedData);
+    }
+
+    /**
+     * Get contents to restore from Local storage
+    */
+    public restore(): Content[] {
+        let data: Content[];
+        try {
+            const storedData = this.localStorage.get(STORAGE_CONTENTS_KEY);
+            data = JSON.parse(storedData);
+        } finally {
+            return data ? data : [];
+        }
+    }
+
+    public seperationRestore(): { auto: boolean, ext: boolean } {
+        let data: { auto: boolean, ext: boolean };
+        try {
+            const storedData = this.localStorage.get(SEPERATION_CONTENTS_KEY);
+            data = JSON.parse(storedData);
+        } finally {
+            return data ? data : { auto: false, ext: false };
+        }
+    }
+
+    /**
+    * Save content into Local storage
+    */
+    public store(contents: Content[]): void {
+        const stringifiedData = JSON.stringify(contents);
+        this.localStorage.set(STORAGE_CONTENTS_KEY, stringifiedData);
+    }
+
     /**
      * Compute playlist from contents by insert strategy algorithm
      * @param _contents @type Content[]: given content list
      * @returns computed playlist
-     */
+    */
     private simpleCalculator(contents: Content[]): Content[] {
         const ordererContents: Content[] = contents.sort((c1: Content, c2: Content) => {
             return c1.saturation < c2.saturation ? 1 : -1;
@@ -294,24 +441,54 @@ export class PlaylistVizService {
     }
 
     /**
-     * Get contents to restore from Local storage
-    */
-    public restore(): Content[] {
-        let data: Content[];
-        try {
-            const storedData = this.localStorage.get(STORAGE_CONTENTS_KEY);
-            data = JSON.parse(storedData);
-        } finally {
-            return data ? data : [];
-        }
-    }
+     * Compute playlist from contents by Insert-Evaluate-Decide algorithm
+     * @param _contents @type Content[]: given content list
+     * @returns computed playlist
+     */
+    private bubbleCalculator(_contents: Content[]): Content[] {
+        const playlist: Content[] = [];
 
-    /**
-    * Save content into Local storage
-    */
-    public store(contents: Content[]): void {
-        const stringifiedData = JSON.stringify(contents);
-        this.localStorage.set(STORAGE_CONTENTS_KEY, stringifiedData);
+        const ordererContents: Content[] = _contents.sort((c1: Content, c2: Content) => {
+            return c1.saturation > c2.saturation ? 1 : -1;
+        });
+
+        ordererContents.forEach((content: Content) => {
+            let maxRating = MAX_VALUE;
+
+            Array.from(Array(content.saturation).keys()).forEach((s: number) => {
+                let playlistTemp = [];
+                let bestPivot: Content = null;
+                let bestPivotIndex: number = null;
+
+                playlist.forEach((pivot: Content, index: number) => {
+                    /** Check seperation */
+
+                    playlistTemp = [...playlist];
+                    playlistTemp.splice(index, 0, content);
+
+                    const contentsTemp = contentsFromPlaylist(playlistTemp);
+                    const rating = this.ratePlaylist(contentsTemp, playlistTemp);
+
+                    if (rating < maxRating) {
+                        bestPivot = pivot;
+                        bestPivotIndex = index;
+                        maxRating = rating;
+                    }
+                });
+
+                if (bestPivot && bestPivotIndex !== null) {
+                    playlist.splice(bestPivotIndex, 0, content);
+                } else {
+                    playlist.push(content);
+                }
+
+                maxRating = MAX_VALUE;
+                bestPivotIndex = null;
+                bestPivot = null;
+            });
+        });
+
+        return playlist;
     }
 }
 
@@ -340,10 +517,30 @@ export function contentsFromPlaylist(playlist: Content[]): Content[] {
 
     const newContents: Content[] = [];
     contentMap.forEach((value: number, key: string) => {
-        const content: Content = Object.assign(playlist.find((c: Content) => c.name === key));
+        const content: Content = Object.assign({}, playlist.find((c: Content) => c.name === key));
         content.saturation = value;
         newContents.push(content);
     });
 
     return newContents;
+}
+
+export function shuffle(array: any[]): any[] {
+    let counter = array.length;
+
+    // While there are elements in the array
+    while (counter > 0) {
+        // Pick a random index
+        const index = Math.floor(Math.random() * counter);
+
+        // Decrease counter by 1
+        counter--;
+
+        // And swap the last element with it
+        const temp = array[counter];
+        array[counter] = array[index];
+        array[index] = temp;
+    }
+
+    return array;
 }

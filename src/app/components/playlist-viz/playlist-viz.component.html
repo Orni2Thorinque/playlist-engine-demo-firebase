@@ -44,11 +44,6 @@
             <input matInput color="accent" style="color:#ffd740 " [formControl]="nameCtrl">
           </mat-form-field>
         </div>
-
-        <button mat-mini-fab class="assign-content" *ngIf="contents && contents.length" (click)="onChangeMode()">
-          <mat-icon *ngIf="!isDoughnut" svgIcon="chart" style="fill: #ffd740"></mat-icon>
-          <mat-icon *ngIf="isDoughnut" svgIcon="donut" style="fill: #ffd740"></mat-icon>
-        </button>
       </div>
     </div>
   </mat-tab>
@@ -58,9 +53,19 @@
     <ng-template mat-tab-label>
       <mat-icon svgIcon="lines" style="fill: #ffd740"></mat-icon>
     </ng-template>
-    <div class="force-map-container" [style.width.px]="windowDim[0]" [style.height.px]="windowDim[1]">
-      <ngx-charts-force-directed-graph (click)="onTargetNode($event)" [animations]="true" [legend]="true" [legendTitle]="'Contents'" [nodes]="forceMapData" [links]="forceMapLinks"
-        [scheme]="forceMapColors" [view]="[windowDim[0] - 40, windowDim[1]]" [tooltipDisabled]="false" (select)="onSelectNode($event)" #forceMap>
+    <div class="force-map-container" [style.width.px]="windowDim[0]" [style.height.px]="windowDim[1]" fxLayout="column" fxLayoutAlign="center center">
+      <div class="separation-control" [style.width.px]="windowDim[0] - 20" [style.height.px]="50" fxLayout="row" fxLayoutAlign="center center"
+        fxLayoutGap="10px">
+        <mat-slide-toggle color="accent" [(checked)]="isSeperate" (change)="onChangeSeperation('ext', $event)">
+          Seperation
+        </mat-slide-toggle>
+        <mat-slide-toggle color="color" [(checked)]="isSelfSeperate" (change)="onChangeSeperation('auto', $event)">
+          Auto-Seperation
+        </mat-slide-toggle>
+      </div>
+      <ngx-charts-force-directed-graph (click)="onTargetNode($event)" [animations]="true" [legend]="true" [legendTitle]="''" [nodes]="forceMapData"
+        [links]="forceMapLinks" [scheme]="forceMapColors" [view]="[windowDim[0] - 20, windowDim[1] - 50]" [tooltipDisabled]="false"
+        (select)="onSelectNode($event)" #forceMap>
       </ngx-charts-force-directed-graph>
     </div>
   </mat-tab>
@@ -75,6 +80,14 @@
       <ngx-charts-pie-chart *ngIf="pieColors && pieData" [view]="[windowDim[0], pieHeight]" [results]="pieData" [scheme]="pieColors"
         [animations]="true" [labels]="true" [doughnut]="isDoughnut" [gradient]="true" [tooltipDisabled]="false" fxLayout="row">
       </ngx-charts-pie-chart>
+      <button mat-raised-button class="assign-content" *ngIf="contents && contents.length" (click)="onChangeMode()">
+        <mat-icon *ngIf="!isDoughnut" svgIcon="chart" style="fill: #ffd740"></mat-icon>
+        <mat-icon *ngIf="isDoughnut" svgIcon="donut" style="fill: #ffd740"></mat-icon>
+      </button>
+
+      <button mat-raised-button class="compute-content" [disabled]="!contents || contents.length === 0" (click)="onCompute()">
+        <mat-icon svgIcon="play" style="fill: #ffd740"></mat-icon>
+      </button>
     </div>
   </mat-tab>
 </mat-tab-group>
