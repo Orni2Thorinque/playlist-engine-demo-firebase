@@ -146,6 +146,10 @@ export class PlaylistVizComponent implements OnInit, AfterViewInit {
 
   public onRemoveContent(_content: Content): void {
     this.contents = this.contents.filter((content: Content) => content.name !== _content.name);
+    this.contents.forEach((c: Content) => {
+      c.separation = c.separation.filter((seperation: string) => seperation !== _content.name);
+    });
+
     this.onAssignContent();
   }
 
